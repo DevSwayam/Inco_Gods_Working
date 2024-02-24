@@ -36,11 +36,11 @@ const OnboardModal = () => {
         return (
           <>
             <p className={styles.modalText}>
-              You don't have Core Wallet installed!
+              You don't have Meta Mask Wallet installed!
             </p>
             <CustomButton
-              title="Download Core"
-              handleClick={() => window.open('https://core.app/', '_blank')}
+              title="Download Meta Mask"
+              handleClick={() => window.open('https://metamask.io/', '_blank')}
             />
           </>
         );
