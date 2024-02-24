@@ -17,7 +17,9 @@ const JoinBattle = () => {
     setBattleName(battleName);
 
     try {
-      await contract.joinBattle(battleName);
+      await contract.joinBattle(battleName,{
+        gasLimit: 7920027,
+      });
 
       setShowAlert({ status: true, type: 'success', message: `Joining ${battleName}` });
     } catch (error) {

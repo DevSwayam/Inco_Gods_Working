@@ -22,7 +22,9 @@ const CreateBattle = () => {
     if (battleName === '' || battleName.trim() === '') return null;
 
     try {
-      await contract.createBattle(battleName);
+      await contract.createBattle(battleName,{
+        gasLimit: 7920027,
+      });
 
       setWaitBattle(true);
     } catch (error) {

@@ -1,4 +1,4 @@
 import contract from "./IncoGods.json";
 
-export const ADDRESS = "0x2e6Aa7e27a667c3568614965eDb494bb0828caA5";
+export const ADDRESS = "0x9e3BAF1809dbf8D202A27f70DDb458862fC1fAd5";
 export const { abi: abi } = contract;
