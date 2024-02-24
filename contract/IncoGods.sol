@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.19;
+pragma solidity ^0.8.20;
 
-import '@openzeppelin/contracts@4.8.0/token/ERC1155/ERC1155.sol';
-import '@openzeppelin/contracts@4.8.0/access/Ownable.sol';
-import '@openzeppelin/contracts@4.8.0/token/ERC1155/extensions/ERC1155Supply.sol';
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.8.0/contracts/token/ERC1155/ERC1155.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.8.0/contracts/access/Ownable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/v4.8.0/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 import "fhevm/lib/TFHE.sol";
+
+//  https://gateway.pinata.cloud/ipfs/QmX2ubhtBPtYw75Wrpv6HLb1fhbJqxrnbhDo1RViW3oVoi
 
 
 contract INCOGods is ERC1155, Ownable, ERC1155Supply {
@@ -135,6 +137,7 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
   }
 
   function initialize() private {
+    // q why zero here? 
     gameTokens.push(GameToken("", 0,TFHE.asEuint8(0), TFHE.asEuint8(0)));
     players.push(Player(address(0), "", 0, 0, false));
     battles.push(Battle(BattleStatus.PENDING, bytes32(0), "", [address(0), address(0)], [0, 0], address(0)));
@@ -184,9 +187,10 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
 
     _mint(msg.sender, randId, 1, '0x0');
     totalSupply++;
-    uint8 rnd = TFHE.decrypt(randAttackStrength);
+    uint8 attack = TFHE.decrypt(randAttackStrength);
     uint8 defense = TFHE.decrypt(randAttackStrength);
-    emit NewGameToken(msg.sender, randId, uint256(rnd), uint256(defense));
+    // @dev using emit based functionality right now but should use EIP 712 signature to get back encrypted values instead of decrypting them
+    emit NewGameToken(msg.sender, randId, uint256(attack), uint256(defense));
     return newGameToken;
   }
 
@@ -264,6 +268,7 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
   }
 
   // User chooses attack or defense move for battle card
+  // @dev needs to implement Encrypted
   function attackOrDefendChoice(uint8 _choice, string memory _battleName) external {
     Battle memory _battle = getBattle(_battleName);
 
@@ -423,7 +428,6 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
   function quitBattle(string memory _battleName) public {
     Battle memory _battle = getBattle(_battleName);
     require(_battle.players[0] == msg.sender || _battle.players[1] == msg.sender, "You are not in this battle!");
-
     _battle.players[0] == msg.sender ? _endBattle(_battle.players[1], _battle) : _endBattle(_battle.players[0], _battle);
   }
 
