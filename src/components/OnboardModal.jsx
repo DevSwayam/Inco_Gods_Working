@@ -76,7 +76,7 @@ const OnboardModal = () => {
             </p>
             <CustomButton
               title="Grab some test tokens"
-              handleClick={() => window.open('https://inco-testnet.vercel.app//', '_blank')}
+              handleClick={() => window.open('https://faucet.inco.org/', '_blank')}
             />
           </>
         );
