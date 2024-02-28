@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-import styles from '../styles';
-import { useGlobalContext } from '../context';
-import { CustomButton, CustomInput, GameLoad, PageHOC } from '../components';
+import styles from "../styles";
+import { useGlobalContext } from "../context";
+import { CustomButton, CustomInput, GameLoad, PageHOC } from "../components";
 
 const CreateBattle = () => {
-  const { contract, gameData, battleName, setBattleName, setErrorMessage } = useGlobalContext();
+  const { contract, gameData, battleName, setBattleName, setErrorMessage } =
+    useGlobalContext();
   const [waitBattle, setWaitBattle] = useState(false);
   const navigate = useNavigate();
 
@@ -18,11 +19,25 @@ const CreateBattle = () => {
     }
   }, [gameData]);
 
-  const handleClick = async () => {
-    if (battleName === '' || battleName.trim() === '') return null;
+  const handleClickMultiplayer = async () => {
+    if (battleName === "" || battleName.trim() === "") return null;
 
     try {
-      await contract.createBattle(battleName,{
+      await contract.createBattle(battleName, {
+        gasLimit: 7920027,
+      });
+
+      setWaitBattle(true);
+    } catch (error) {
+      setErrorMessage(error);
+    }
+  };
+
+  const handleClickSinglePlayer = async () => {
+    if (battleName === "" || battleName.trim() === "") return null;
+
+    try {
+      await contract.createSinglePlayerBattle(battleName, {
         gasLimit: 7920027,
       });
 
@@ -35,7 +50,6 @@ const CreateBattle = () => {
   return (
     <>
       {waitBattle && <GameLoad />}
-
       <div className="flex flex-col mb-5">
         <CustomInput
           label="Battle"
@@ -43,14 +57,20 @@ const CreateBattle = () => {
           value={battleName}
           handleValueChange={setBattleName}
         />
-
-        <CustomButton
-          title="Create Battle"
-          handleClick={handleClick}
-          restStyles="mt-6"
-        />
+        <div>
+          <CustomButton
+            title="Single Player Battle"
+            handleClick={handleClickSinglePlayer}
+            restStyles="mt-6"
+          />
+          <CustomButton
+            title="Multiplayer Battle"
+            handleClick={handleClickMultiplayer}
+            restStyles="mt-6"
+          />
+        </div>
       </div>
-      <p className={styles.infoText} onClick={() => navigate('/join-battle')}>
+      <p className={styles.infoText} onClick={() => navigate("/join-battle")}>
         Or join already existing battles
       </p>
     </>
@@ -59,6 +79,8 @@ const CreateBattle = () => {
 
 export default PageHOC(
   CreateBattle,
-  <>Create <br /> a new Battle</>,
-  <>Create your own battle and wait for other players to join you</>,
+  <>
+    Create <br /> a new Battle
+  </>,
+  <>Create your own battle and wait for other players to join you</>
 );

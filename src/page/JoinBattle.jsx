@@ -47,6 +47,7 @@ const JoinBattle = () => {
               <p className={styles.joinLoading}>Reload the page to see new battles</p>
           )}
       </div>
+      
 
       <p className={styles.infoText} onClick={() => navigate('/create-battle')}>
         Or create a new battle

@@ -5,7 +5,7 @@ import styles from '../styles';
 const CustomButton = ({ title, handleClick, restStyles }) => (
   <button
     type="button"
-    className={`${styles.btn} ${restStyles}`}
+    className={`${styles.btn} ${restStyles} mr-4`}
     onClick={handleClick}
   >
     {title}

@@ -58,6 +58,24 @@
 			"type": "function"
 		},
 		{
+			"inputs": [
+				{
+					"internalType": "uint8",
+					"name": "_choice",
+					"type": "uint8"
+				},
+				{
+					"internalType": "string",
+					"name": "_battleName",
+					"type": "string"
+				}
+			],
+			"name": "attackOrDefendChoiceForSinglePlayerBattle",
+			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
 			"anonymous": false,
 			"inputs": [
 				{
@@ -162,6 +180,57 @@
 			],
 			"name": "createRandomGameToken",
 			"outputs": [],
+			"stateMutability": "nonpayable",
+			"type": "function"
+		},
+		{
+			"inputs": [
+				{
+					"internalType": "string",
+					"name": "_name",
+					"type": "string"
+				}
+			],
+			"name": "createSinglePlayerBattle",
+			"outputs": [
+				{
+					"components": [
+						{
+							"internalType": "enum INCOGods.BattleStatus",
+							"name": "battleStatus",
+							"type": "uint8"
+						},
+						{
+							"internalType": "bytes32",
+							"name": "battleHash",
+							"type": "bytes32"
+						},
+						{
+							"internalType": "string",
+							"name": "name",
+							"type": "string"
+						},
+						{
+							"internalType": "address[2]",
+							"name": "players",
+							"type": "address[2]"
+						},
+						{
+							"internalType": "uint8[2]",
+							"name": "moves",
+							"type": "uint8[2]"
+						},
+						{
+							"internalType": "address",
+							"name": "winner",
+							"type": "address"
+						}
+					],
+					"internalType": "struct INCOGods.Battle",
+					"name": "",
+					"type": "tuple"
+				}
+			],
 			"stateMutability": "nonpayable",
 			"type": "function"
 		},
