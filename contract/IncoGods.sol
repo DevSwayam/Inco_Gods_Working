@@ -372,7 +372,7 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
 
         require(
             msg.sender == _battle.players[0] ||
-                msg.sender == _battle.players[1],
+                bot == _battle.players[1],
             "Only players in this battle can make a move"
         );
 
@@ -693,11 +693,6 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
         ); // Require that player is in the battle
 
         require(
-            _battle.moves[_battle.players[0] == msg.sender ? 0 : 1] == 0,
-            "You have already made a move!"
-        );
-
-        require(
             bot == _battle.players[1],
             "This Battle Can Only Played Against Bot"
         ); 
@@ -707,15 +702,11 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
         // Creating Move For Bot 
         euint8 encryptedMove = _createRandomNum();
         uint8 moveInUint8 = TFHE.decrypt(encryptedMove);
-        _registerPlayerMoveForBot(1 , (moveInUint8%2)+1, _battleName);
-        
+        uint8 bot_choice = (moveInUint8%2)+1;
+        _registerPlayerMoveForBot( 1 , bot_choice, _battleName);
         _battle = getBattle(_battleName);
-        uint _movesLeft = 2 - (_battle.moves[0] == 0 ? 0 : 1) - (_battle.moves[1] == 0 ? 0 : 1);
-        emit BattleMove(_battleName, _movesLeft == 1 ? true : false);
-    
-        if(_movesLeft == 0) {
-            _awaitBattleResults(_battleName);
-        }
+        _awaitBattleResults(_battleName);
+        emit BattleMove(_battleName, false);
     }
 
       function _registerPlayerMoveForBot(
