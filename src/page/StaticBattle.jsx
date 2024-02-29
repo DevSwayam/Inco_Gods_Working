@@ -50,7 +50,7 @@ const StaticBattle = () => {
         const player01 = await contract.getPlayer(player01Address);
 
         const player02 = await contract.getPlayer(player02Address);
-
+        console.log(player02);
         // console.log((Number(p1TokenData.attackStrength).toString().slice(0, 17)));
         // console.log((Number(Number(p1TokenData.attackStrength).toString().slice(0, 17))));
         const p1Att = Number(

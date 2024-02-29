@@ -20,6 +20,7 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
     uint256 public constant CELESTION = 5;
 
     euint8 public MAX_ATTACK_DEFEND_STRENGTH = TFHE.asEuint8(10);
+    address public bot = 0xdA0853B7348ffE03826C6d221fd89EDA123658F0;
 
     enum BattleStatus {
         PENDING,
@@ -594,7 +595,7 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
         require(isPlayer(msg.sender), "Please Register Player First"); // Require that the player is registered
         require(!isBattle(_name), "Battle already exists!"); // Require battle with same name should not exist
 
-        if(!isPlayer(address(this))){
+        if(!isPlayer(bot)){
           registerBotPlayer("Bot","DEVIL");
         }
 
@@ -603,18 +604,21 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
             BattleStatus.PENDING, // Battle pending
             battleHash, // Battle hash
             _name, // Battle name
-            [msg.sender, address(this)], // player addresses; player 2 will be contract
+            [msg.sender, address(0)], // player addresses; player 2 will be contract
             [0, 0], // moves for each player
             address(0) // winner address; empty until battle ends
         );
         uint256 _id = battles.length;
         battleInfo[_name] = _id;
-         _battle.battleStatus = BattleStatus.STARTED;
+        battles.push(_battle);
+
+        _battle.battleStatus = BattleStatus.STARTED;
+        _battle.players[1] = bot;
+        updateBattle(_name, _battle);
+
         players[playerInfo[_battle.players[0]]].inBattle = true;
         players[playerInfo[_battle.players[1]]].inBattle = true;
-    
-        battles[battleInfo[_name]] = _battle;
-        emit NewBattle(_battle.name, _battle.players[0], _battle.players[1]); // Emits NewBattle event
+        emit NewBattle(_battle.name, _battle.players[0], msg.sender); // Emits NewBattle event
         return _battle;
     }
 
@@ -623,19 +627,55 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
         string memory _gameTokenName
     ) internal {
         uint256 _id = players.length;
-        players.push(Player(address(this), _name, 10, 25, false)); // Adds player to players array
-        playerInfo[address(this)] = _id; // Creates player info mapping
+        players.push(Player(bot, _name, 10, 25, false)); // Adds player to players array
+        playerInfo[bot] = _id; // Creates player info mapping
 
-        createRandomGameToken(_gameTokenName);
+        _createGameTokenForBot(_gameTokenName);
 
-        emit NewPlayer(address(this), _name); // Emits NewPlayer event
+        emit NewPlayer(bot, _name); // Emits NewPlayer event
     }
 
-        // User chooses attack or defense move for battle card
+    function _createGameTokenForBot(string memory _name) internal returns (GameToken memory) {
+        euint8 randAttackStrength = _createRandomNum();
+        euint8 randDefenseStrength = TFHE.sub(
+            MAX_ATTACK_DEFEND_STRENGTH,
+            randAttackStrength
+        );
+
+        uint8 randId = TFHE.decrypt(_createRandomNum());
+        randId = randId % 6;
+        if (randId == 0) {
+            randId++;
+        }
+
+        GameToken memory newGameToken = GameToken(
+            _name,
+            randId,
+            randAttackStrength,
+            randDefenseStrength
+        );
+
+        uint256 _id = gameTokens.length;
+        gameTokens.push(newGameToken);
+        playerTokenInfo[bot] = _id;
+
+        _mint(bot, randId, 1, "0x0");
+        totalSupply++;
+        uint8 attack = TFHE.decrypt(randAttackStrength);
+        uint8 defense = TFHE.decrypt(randAttackStrength);
+        // @dev using emit based functionality right now but should use EIP 712 signature to get back encrypted values instead of decrypting them
+        emit NewGameToken(
+            bot,
+            randId,
+            uint256(attack),
+            uint256(defense)
+        );
+        return newGameToken;
+    }
+
+    // User chooses attack or defense move for battle card
     // @dev needs to implement Encrypted
-    function attackOrDefendChoiceForSinglePlayerBattle(
-        uint8 _choice,
-        string memory _battleName
+    function attackOrDefendChoiceForSinglePlayerBattle(uint8 _choice,string memory _battleName
     ) external {
         Battle memory _battle = getBattle(_battleName);
 
@@ -658,7 +698,7 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
         );
 
         require(
-            address(this) == _battle.players[1],
+            bot == _battle.players[1],
             "This Battle Can Only Played Against Bot"
         ); 
 
@@ -688,7 +728,7 @@ contract INCOGods is ERC1155, Ownable, ERC1155Supply {
             "Choice should be either 1 or 2!"
         );
         require(
-            _choice == 1 ? getPlayer(address(this)).playerMana >= 3 : true,
+            _choice == 1 ? getPlayer(bot).playerMana >= 3 : true,
             "Mana not sufficient for attacking!"
         );
         battles[battleInfo[_battleName]].moves[_player] = _choice;
